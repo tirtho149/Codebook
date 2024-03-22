@@ -1,0 +1,24 @@
+import java.util.HashMap;
+
+public class Main {
+  public static void main(String[] args) {
+    HashMap<String, String> c = new HashMap<String, String>();
+    c.put("A", "Apple");
+    c.put("B", "Ball");
+    c.put("C", "Cat");
+    System.out.print(c);
+    c.remove("A");
+    System.out.print(c);
+    System.out.print(c.get("B"));
+    System.out.print(c.size());
+    c.replace("B", "Apon");
+    System.out.print(c);
+    System.out.print(c.containsKey("A"));
+    System.out.print(c.containsValue("A"));
+    for (String i : c.keySet()) {
+      System.out.print(i + "\t" + "=");
+      System.out.print(c.get(i));
+    }
+
+  }
+}
