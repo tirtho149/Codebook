@@ -1,0 +1,7 @@
+Stack Data Structure #import java.util.Stack
+A stack is a LIFO (last in, first out) data structure. 
+push: add an item to the top of the stack
+pop: remove the topmost item from the stack and return it
+peek: return the topmost item from the stack without removing it
+empty: check if the stack is empty
+search: search for an item in the stack
