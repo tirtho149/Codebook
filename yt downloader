@@ -1,0 +1,31 @@
+import yt_dlp
+import os
+
+# Define the URL of the YouTube channel
+channel_url = 'https://www.youtube.com/@nationalcollegiatesalescom7843'
+
+# Ensure the downloads directory exists
+os.makedirs('downloads', exist_ok=True)
+
+# Options for yt-dlp
+ydl_opts = {
+    'format': 'best',
+    'outtmpl': 'downloads/%(title)s.%(ext)s',
+    'ignoreerrors': True,
+    'extract_flat': True,
+}
+
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    # Extract the channel's video list
+    info_dict = ydl.extract_info(channel_url, download=False)
+    if 'entries' in info_dict:
+        video_urls = [entry['url'] for entry in info_dict['entries'] if entry]
+
+        # Download each video
+        for url in video_urls:
+            try:
+                ydl.download([url])
+            except Exception as e:
+                print(f"Error downloading {url}: {e}")
+    else:
+        print("No videos found.")
