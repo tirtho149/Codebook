@@ -1,0 +1,79 @@
+import os
+import re
+import pandas as pd
+
+
+def parse_vtt(text):
+    pattern = r'(\d{2}:\d{2}:\d{2}\.\d{3}) --> \d{2}:\d{2}:\d{2}\.\d{3}\n<v ([^>]+)>(.+?)(?=\n\d{2}:\d{2}:\d{2}\.\d{3}|\nWEBVTT|\n$)'
+    matches = re.findall(pattern, text, re.DOTALL)
+
+    data = []
+    for match in matches:
+        start_timestamp, speaker, utterance = match
+        utterance = utterance.replace('\n', ' ').strip()
+        data.append({
+            'Timestamp': start_timestamp,
+            'Speaker': speaker,
+            'Utterance': utterance
+        })
+
+    df = pd.DataFrame(data)
+    return df
+
+
+def merge_utterances(df):
+    merged_data = []
+    current_speaker = None
+    current_utterance = []
+    current_timestamp = None
+
+    for _, row in df.iterrows():
+        if row['Speaker'] == current_speaker:
+            current_utterance.append(row['Utterance'])
+        else:
+            if current_speaker is not None:
+                merged_data.append({
+                    'Turn': current_speaker,
+                    'Timestamp': current_timestamp,
+                    'Utterance': ' '.join(current_utterance)
+                })
+            current_speaker = row['Speaker']
+            current_utterance = [row['Utterance']]
+            current_timestamp = row['Timestamp']
+
+    if current_speaker is not None:
+        merged_data.append({
+            'Turn': current_speaker,
+            'Timestamp': current_timestamp,
+            'Utterance': ' '.join(current_utterance)
+        })
+
+    merged_df = pd.DataFrame(merged_data)
+    return merged_df
+
+
+def process_vtt_file(input_filepath, output_filepath):
+    with open(input_filepath, 'r', encoding='utf-8') as file:
+        vtt_text = file.read()
+
+    df = parse_vtt(vtt_text)
+    merged_df = merge_utterances(df)
+
+    with open(output_filepath, 'w', encoding='utf-8') as file:
+        for _, row in merged_df.iterrows():
+            file.write(
+                f"{row['Turn']} {row['Timestamp']}\n{row['Utterance']}\n\n")
+
+
+input_folder = r'Transcripts'
+output_folder = r'C:\final'
+
+os.makedirs(output_folder, exist_ok=True)
+
+for filename in os.listdir(input_folder):
+    if filename.endswith('.vtt'):
+        input_filepath = os.path.join(input_folder, filename)
+        output_filepath = os.path.join(output_folder, filename)
+        process_vtt_file(input_filepath, output_filepath)
+
+print("Processing complete!")
